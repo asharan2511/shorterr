@@ -1,29 +1,26 @@
 import prisma from "../lib/db";
 import Replicate from "replicate";
-import { v2 as cloudinary } from "cloudinary";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+
 import { randomUUID } from "crypto";
 
 const replicate = new Replicate({
   auth: process.env.REPLICATE_TOKEN,
 });
 
-cloudinary.config({
-  api_key: process.env.CLOUDINARY_API_KEY,
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
-const uploadImageToCloudinary = async (url: string, fileName: string) => {
-  const result = await cloudinary.uploader.upload(url, {
-    public_id: fileName,
-  });
-
-  return result?.secure_url;
-};
-
 type ReplicateOutputItem = {
   url: () => string; // function that returns a string
 };
+
+const s3Client = new S3Client({
+  region: process.env.AWS_REGION || "",
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID || "",
+    secretAccessKey: process.env.AWS_ACCESS_KEY_SECRET || "",
+  },
+});
+
+const bucketname = process.env.S3_BUCKET_NAME;
 
 const processImage = async (img: string) => {
   try {
@@ -40,11 +37,25 @@ const processImage = async (img: string) => {
       input,
     })) as ReplicateOutputItem[];
     const imageUrl = output[0].url().href;
-    const fileName = `${randomUUID()}`;
+    const fileName = `${randomUUID()}.png`;
 
-    //upload to cloudinary and store the url
-    const secure_url = await uploadImageToCloudinary(imageUrl, fileName);
-    return secure_url;
+    const response = await fetch(imageUrl);
+
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    const command = new PutObjectCommand({
+      Bucket: bucketname,
+      Key: fileName,
+      Body: buffer,
+      ContentType: "image/png",
+    });
+
+    await s3Client.send(command);
+
+    const s3Url = `https://${bucketname}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
+
+    return s3Url;
   } catch (error) {
     console.error("Error while generating the image from Replicate", error);
     throw error;
@@ -61,20 +72,21 @@ export const generateImage = async (videoId: string) => {
 
     if (!video) return null;
 
-    // const imageUrls = await Promise.all(
-    //   video.imagePrompt.map((item: string) => processImage(item))
-    // );
+    const imageUrls = await Promise.all(
+      video.imagePrompt.map((item: string) => processImage(item))
+    );
 
-    const imageUrls = [
-      "https://res.cloudinary.com/deumgmewo/image/upload/v1757662176/6e4b06a4-16cc-46a1-a2ba-739c6fd9d0c2.webp",
-      "https://res.cloudinary.com/deumgmewo/image/upload/v1757662176/a5c86b4b-707f-418b-878c-cb0ce41a2d3c.webp",
-      "https://res.cloudinary.com/deumgmewo/image/upload/v1757662176/bc6a1edc-8d90-4bcd-97b3-62112141c317.webp",
-      "https://res.cloudinary.com/deumgmewo/image/upload/v1757662176/97ca588f-8670-47f0-8e84-bf9fc6bd9c73.webp",
-      "https://res.cloudinary.com/deumgmewo/image/upload/v1757662176/53db693d-736b-4693-90da-a27a61f0e95b.webp",
-      "https://res.cloudinary.com/deumgmewo/image/upload/v1757662176/97743075-880a-43b4-a95a-8d6fb76193aa.webp",
-      "https://res.cloudinary.com/deumgmewo/image/upload/v1757662176/2fd1dd10-5049-486b-8e05-7dfed517f0d5.webp",
-      "https://res.cloudinary.com/deumgmewo/image/upload/v1757662176/259b487f-0c43-4038-a3c7-3e7ef78fa15a.webp",
-    ];
+    console.log(imageUrls);
+    // const imageUrls = [
+    //   "https://res.cloudinary.com/deumgmewo/image/upload/v1757662176/6e4b06a4-16cc-46a1-a2ba-739c6fd9d0c2.webp",
+    //   "https://res.cloudinary.com/deumgmewo/image/upload/v1757662176/a5c86b4b-707f-418b-878c-cb0ce41a2d3c.webp",
+    //   "https://res.cloudinary.com/deumgmewo/image/upload/v1757662176/bc6a1edc-8d90-4bcd-97b3-62112141c317.webp",
+    //   "https://res.cloudinary.com/deumgmewo/image/upload/v1757662176/97ca588f-8670-47f0-8e84-bf9fc6bd9c73.webp",
+    //   "https://res.cloudinary.com/deumgmewo/image/upload/v1757662176/53db693d-736b-4693-90da-a27a61f0e95b.webp",
+    //   "https://res.cloudinary.com/deumgmewo/image/upload/v1757662176/97743075-880a-43b4-a95a-8d6fb76193aa.webp",
+    //   "https://res.cloudinary.com/deumgmewo/image/upload/v1757662176/2fd1dd10-5049-486b-8e05-7dfed517f0d5.webp",
+    //   "https://res.cloudinary.com/deumgmewo/image/upload/v1757662176/259b487f-0c43-4038-a3c7-3e7ef78fa15a.webp",
+    // ];
     await prisma.video.update({
       where: {
         videoId: videoId,

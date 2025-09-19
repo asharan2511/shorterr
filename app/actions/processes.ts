@@ -6,12 +6,14 @@ import { generateImage } from "./image";
 import { generateAudio } from "./audio";
 import { generateCaptions } from "./captions";
 import { videoDuration } from "../lib/duration";
+import { renderVideo } from "./render";
 
 export const processes = async (videoId: string) => {
   try {
     const prompt = await findPrompt(videoId);
     //script, extract content and image prompt
     const script = await generateScript(prompt || "");
+    console.log("the Script is: ", script);
     const scriptData = JSON.parse(script || "");
     const contentText = scriptData.content.map(
       (data: { contentText: string }) => data.contentText
@@ -36,6 +38,7 @@ export const processes = async (videoId: string) => {
     await generateCaptions(videoId ?? "");
     await imagePromise;
     await videoDuration(videoId ?? "");
+    await renderVideo(videoId ?? "");
   } catch (error) {
     console.log("error in making video", error);
     throw error;

@@ -1,25 +1,17 @@
 import prisma from "../lib/db";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import axios from "axios";
-
-import { v2 as cloudinary } from "cloudinary";
 import { randomUUID } from "crypto";
 
-cloudinary.config({
-  api_key: process.env.CLOUDINARY_API_KEY,
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+const s3Client = new S3Client({
+  region: process.env.AWS_REGION || "",
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID || "",
+    secretAccessKey: process.env.AWS_ACCESS_KEY_SECRET || "",
+  },
 });
 
-const uploadAudioToCloudinary = async (url: string, fileName: string) => {
-  const result = await cloudinary.uploader.upload(url, {
-    resource_type: "video",
-    public_id: fileName,
-    format: "mp3",
-  });
-
-  return result?.secure_url;
-};
-
+const bucketname = process.env.S3_BUCKET_NAME;
 export const generateAudio = async (videoId: string) => {
   try {
     const video = await prisma.video.findUnique({
@@ -32,27 +24,41 @@ export const generateAudio = async (videoId: string) => {
 
     console.log("in audio now");
 
-    // const response = await axios.post(
-    //   "https://api.murf.ai/v1/speech/generate",
-    //   { text: video.content, voice_id: "en-US-daniel", style: "Storytelling" },
-    //   {
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //       Accept: "application/json",
-    //       "api-key": process.env.MURF_API_KEY,
-    //     },
-    //   }
-    // );
+    const response = await axios.post(
+      "https://api.murf.ai/v1/speech/generate",
+      { text: video.content, voice_id: "en-US-daniel", style: "Storytelling" },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "api-key": process.env.MURF_API_KEY,
+        },
+      }
+    );
 
-    // const fileName = `${randomUUID()}`;
+    const audioResponse = await axios.get(response.data.audioFile, {
+      responseType: "arraybuffer",
+    });
 
-    // const audioUrl = await uploadAudioToCloudinary(
-    //   response.data.audioFile,
-    //   fileName
-    // );
+    const buffer = Buffer.from(audioResponse.data);
 
-    const audioUrl =
-      "https://res.cloudinary.com/deumgmewo/video/upload/v1757662182/dcda4095-9f0c-4199-ad60-51421340c634.mp3";
+    const fileName = `${randomUUID()}.mp3`;
+
+    const command = new PutObjectCommand({
+      Bucket: bucketname,
+      Key: fileName,
+      Body: buffer,
+      ContentType: "audio/mpeg",
+    });
+
+    await s3Client.send(command);
+
+    const audioUrl = `https://${bucketname}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
+
+    // const audioUrl =
+    //   "https://shorterr69.s3.us-east-1.amazonaws.com/770d4cbf-abbf-4f0a-8672-9ef2d63fcf7b.mp3";
+
+    console.log(audioUrl);
 
     await prisma.video.update({
       where: {

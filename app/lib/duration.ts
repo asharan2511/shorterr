@@ -5,24 +5,29 @@ interface Captions {
   endFrame: number;
 }
 export const videoDuration = async (videoId: string) => {
-  const video = await prisma.video.findUnique({
-    where: {
-      videoId: videoId,
-    },
-  });
+  try {
+    const video = await prisma.video.findUnique({
+      where: {
+        videoId: videoId,
+      },
+    });
 
-  if (!video) return null;
+    if (!video) return null;
 
-  const captions = (video.captions as unknown as Captions[]) ?? [];
+    const captions = (video.captions as unknown as Captions[]) ?? [];
 
-  const calculateDuration = captions[captions.length - 1].endFrame;
+    const calculateDuration = captions[captions.length - 1].endFrame;
 
-  await prisma.video.update({
-    where: {
-      videoId: videoId,
-    },
-    data: {
-      duration: calculateDuration,
-    },
-  });
+    await prisma.video.update({
+      where: {
+        videoId: videoId,
+      },
+      data: {
+        duration: calculateDuration,
+      },
+    });
+  } catch (error) {
+    console.error("Error while generating Audio Captions", error);
+    throw error;
+  }
 };
