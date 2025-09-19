@@ -1,5 +1,4 @@
-import { HeartIcon } from "lucide-react";
-import React, { use } from "react";
+import React from "react";
 import {
   AbsoluteFill,
   Audio,
