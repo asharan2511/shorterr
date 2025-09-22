@@ -7,8 +7,8 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
-    "worker": "tsx wroker/wroker.ts",
-    "wroker:dev": "tsx watch worker/worker.ts",
+    "worker": "tsx worker/worker.ts",
+    "worker:dev": "tsx watch worker/worker.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {
