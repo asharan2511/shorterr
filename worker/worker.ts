@@ -25,7 +25,9 @@ const worker = new Worker(
       console.error("Error occured while processing video: ", videoId);
 
       await prisma.video.update({
-        where: videoId,
+        where: {
+          videoId: videoId,
+        },
         data: {
           processing: false,
           failed: true,
