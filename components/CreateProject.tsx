@@ -59,7 +59,7 @@ const CreateProject = ({ user, credits }: props) => {
             </Button>
           </SignInButton>
           <SignUpButton>
-            <Button className=" bg-gradient-to-br hover:opacity-80 text-white rounded-full from -[#3352CC] to-[#1C2D70] font-medium cursor-pointer">
+            <Button className=" bg-gradient-to-br hover:opacity-80 text-white rounded-full from-[#3352CC] to-[#1C2D70] font-medium cursor-pointer">
               Sign Up
             </Button>
           </SignUpButton>
@@ -68,8 +68,8 @@ const CreateProject = ({ user, credits }: props) => {
       {user && (
         <div className="flex  justify-end gap-1 mr-7 mt-5">
           <TooltipCredits credits={credits} />
-          <Link href={"/dashbaord"}>
-            <Button className=" bg-gradient-to-br hover:opacity-80 text-white rounded-full from -[#3352CC] to-[#1C2D70] font-medium mx-2 cursor-pointer">
+          <Link href={"/dashboard"}>
+            <Button className=" bg-gradient-to-br hover:opacity-80 text-white rounded-full from-[#3352CC] to-[#1C2D70] font-medium mx-2 cursor-pointer">
               Dashboard
             </Button>
           </Link>
@@ -110,7 +110,7 @@ const CreateProject = ({ user, credits }: props) => {
             </Button>
           </SignInButton>
           <SignUpButton>
-            <Button className=" bg-gradient-to-br hover:opacity-80 text-white rounded-full from -[#3352CC] to-[#1C2D70] font-medium cursor-pointer">
+            <Button className=" bg-gradient-to-br hover:opacity-80 text-white rounded-full from-[#3352CC] to-[#1C2D70] font-medium cursor-pointer">
               Sign Up
             </Button>
           </SignUpButton>
@@ -128,7 +128,7 @@ const CreateProject = ({ user, credits }: props) => {
           </DialogHeader>
           <DialogFooter>
             <Button
-              className=" bg-gradient-to-br hover:opacity-80 text-white rounded-full from -[#3352CC] to-[#1C2D70] font-medium cursor-pointer"
+              className=" bg-gradient-to-br hover:opacity-80 text-white rounded-full from-[#3352CC] to-[#1C2D70] font-medium cursor-pointer"
               onClick={() => {
                 router.push("/pricing");
                 setShowCreditDialog(false);

@@ -3,7 +3,9 @@ import { currentUser } from "@clerk/nextjs/server";
 import { randomUUID } from "crypto";
 import prisma from "../lib/db";
 import { decreaseCredits } from "../lib/decreaseCredits";
-import { processes } from "./processes";
+
+import { videoQueue } from "../lib/queue";
+import { redirect } from "next/navigation";
 export const createVideo = async (prompt: string) => {
   const videoId = randomUUID();
   const user = await currentUser();
@@ -21,5 +23,9 @@ export const createVideo = async (prompt: string) => {
   });
 
   await decreaseCredits(userId);
-  processes(videoId);
+
+  await videoQueue.add("generate-video", { videoId });
+  console.log("Job added to queue successfully");
+
+  redirect(`/video/${videoId}`);
 };

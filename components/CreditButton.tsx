@@ -21,7 +21,7 @@ const TooltipCredits = ({ credits }: { credits: number }) => {
           <Button
             variant="flat"
             onPress={() => (window.location.href = "/pricing")}
-            className="bg-gradient-to-br hover:opacity-80 text-white rounded-full from -[#3352CC] to-[#1C2D70] font-medium cursor-pointer text-xs py-1 px-2 w-[90px]"
+            className="bg-gradient-to-br hover:opacity-80 text-white rounded-full from-[#3352CC] to-[#1C2D70] font-medium cursor-pointer text-xs py-1 px-2 w-[90px]"
           >
             Pricing
           </Button>

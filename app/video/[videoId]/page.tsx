@@ -8,6 +8,7 @@ import { AnimatedShinyText } from "@/components/ui/animated-shiny-text";
 import { Input } from "@/components/ui/input";
 import { AnimatedGradientText } from "@/components/ui/animated-gradient-text";
 import { TypingAnimation } from "@/components/ui/typing-animation";
+import VideoActions from "@/components/VideoActions";
 
 const page = async ({ params }: { params: Promise<{ videoId: string }> }) => {
   const { videoId } = await params;
@@ -29,7 +30,7 @@ const page = async ({ params }: { params: Promise<{ videoId: string }> }) => {
 
   const isOwner = userId === video.userId;
   const videourl = video.videoUrl;
-  const transcript = video.captions;
+  const transcript = video.content;
 
   if (!transcript) return null;
   return (
@@ -95,11 +96,19 @@ const page = async ({ params }: { params: Promise<{ videoId: string }> }) => {
                   </AnimatedGradientText>
                 </div>
               </div>
-              <div className="w-10 mt-5 p-4 rounded-md bg-neutral-900/60 background-blur-sm border-gray-100">
+              <div className="w-110 mt-5 p-4 rounded-md bg-neutral-900/60 background-blur-sm border-gray-100">
                 {/* typing animation */}
+                <TypingAnimation className="text-sm text-transparent bg-clip-text bg-gradient-to-r from-gray-300 via-gray-100 to-gray-200">
+                  {transcript}
+                </TypingAnimation>
               </div>
             </div>
           </div>
+          <VideoActions
+            videoId={videoId}
+            videoUrl={videourl}
+            isOwner={isOwner}
+          />
         </div>
       </div>
     </div>
