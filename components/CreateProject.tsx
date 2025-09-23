@@ -92,7 +92,7 @@ const CreateProject = ({ user, credits }: props) => {
   const onSubmit = (e) => {
     e.preventDefault();
     if (!user) {
-      return setTimeout(() => setShowCreditDialog(true), 700);
+      return setTimeout(() => setShowLoginDialog(true), 1000);
     }
     if (credits < 1) {
       return setTimeout(() => setShowCreditDialog(true), 700);
@@ -156,32 +156,33 @@ const CreateProject = ({ user, credits }: props) => {
         </div>
       </div>
       <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm-max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Hello Therer!</DialogTitle>
+            <DialogTitle>Hello There!</DialogTitle>
             <DialogDescription>
-              Please Sign In to create videos
+              Please sing in to create videos
             </DialogDescription>
           </DialogHeader>
+          <DialogFooter>
+            <SignInButton>
+              <Button className="bg-black border border-gray-400 text-white  rounded-full mx-2 hover:bg-gray-900 transitioncolors duration-150  cursor-pointer">
+                Sign In
+              </Button>
+            </SignInButton>
+            <SignUpButton>
+              <Button className="bg-gradient-to-br hover:opacity-80 text-white rounded-full from-[#3352CC] to-[#1C2D70] font-medium cursor-pointer">
+                Sign up
+              </Button>
+            </SignUpButton>
+          </DialogFooter>
         </DialogContent>
-        <DialogFooter>
-          <SignInButton>
-            <Button className="bg-black border-gray-400 text-white rounded-full mx-2 hover:bg-gray-900 transition-colors duration-150 cursor-pointer">
-              Sign In
-            </Button>
-          </SignInButton>
-          <SignUpButton>
-            <Button className=" bg-gradient-to-br hover:opacity-80 text-white rounded-full from-[#3352CC] to-[#1C2D70] font-medium cursor-pointer">
-              Sign Up
-            </Button>
-          </SignUpButton>
-        </DialogFooter>
       </Dialog>
+
       <Dialog open={showCreditDialog} onOpenChange={setShowCreditDialog}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>
-              <div className=" text-red-500">Out of credits</div>
+              <div className="text-red-500">Out of credits</div>
             </DialogTitle>
             <DialogDescription>
               Please add some credits to create videos
@@ -189,7 +190,7 @@ const CreateProject = ({ user, credits }: props) => {
           </DialogHeader>
           <DialogFooter>
             <Button
-              className=" bg-gradient-to-br hover:opacity-80 text-white rounded-full from-[#3352CC] to-[#1C2D70] font-medium cursor-pointer"
+              className="bg-gradient-to-br hover:opacity-80 text-white rounded-full from-[#3352CC] to-[#1C2D70] font-medium cursor-pointer"
               onClick={() => {
                 router.push("/pricing");
                 setShowCreditDialog(false);
@@ -202,7 +203,7 @@ const CreateProject = ({ user, credits }: props) => {
               className="rounded-full cursor-pointer"
               onClick={() => setShowCreditDialog(false)}
             >
-              close
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>
