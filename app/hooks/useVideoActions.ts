@@ -27,18 +27,33 @@ export const useVideoActions = ({
       return null;
     }
 
-    const a = document.createElement("a");
+    try {
+      const loadingToast = toast.loading("Preparing download...", {
+        description: "Please wait while we prepare your video",
+      });
 
-    a.href = videoUrl;
-    a.download = `video-${videoId}.mp4`;
-    a.target = "_blank";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+      const a = document.createElement("a");
 
-    toast.success("Download Started", {
-      description: "Video Downloaded",
-    });
+      a.href = `/api/download/${videoId}`;
+      a.download = `video-${videoId}.mp4`;
+      a.style.display = "none";
+
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      setTimeout(() => {
+        toast.dismiss(loadingToast);
+        toast.success("Download Started", {
+          description: "video saved to your device",
+        });
+      }, 4000);
+    } catch (error) {
+      console.error("download Error:", error);
+      toast.error("Download Failed", {
+        description: "unable to download video. please try again",
+      });
+    }
   };
 
   const handleCopyLink = async () => {

@@ -8,6 +8,8 @@ import { ShineBorder } from "./magicui/shine-border";
 import { PlaceholdersAndVanishInput } from "./ui/placeholders-and-vanish-input";
 import TooltipCredits from "./CreditButton";
 
+import { MultiStepLoader as Loader } from "./ui/multi-step-loader";
+
 import {
   Dialog,
   DialogContent,
@@ -24,6 +26,21 @@ interface props {
 }
 
 const CreateProject = ({ user, credits }: props) => {
+  const LoadingState = [
+    { text: "Generating context" },
+    { text: "Generating Image Scripts" },
+    { text: "Generating Image 1" },
+    { text: "Generating Image 2" },
+    { text: "Generating Image 3" },
+    { text: "Generating Image 4" },
+    { text: "Generating Image 5" },
+    { text: "Generating Audio Script" },
+    { text: "Generating Audio" },
+    { text: "Generating Captions" },
+    { text: "Combining it All" },
+    { text: "Almost done" },
+    { text: "Completed, redirecting" },
+  ];
   const placeholders = [
     "What's the first rule of Fight Club",
     "Who is Virat Kohli",
@@ -33,7 +50,41 @@ const CreateProject = ({ user, credits }: props) => {
   const [prompt, setPrompt] = useState("");
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [showCreditDialog, setShowCreditDialog] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+
+  const handleCreateVideo = async () => {
+    setIsLoading(true);
+    try {
+      const result = await createVideo(prompt);
+
+      if (result?.videoId) {
+        const pollInterval = setInterval(async () => {
+          try {
+            const response = await fetch(`/api/video-status/${result.videoId}`);
+            const data = await response.json();
+            if (data.Completed) {
+              clearInterval(pollInterval);
+              router.replace(`/video/${result.videoId}`);
+            } else if (data.failed) {
+              clearInterval(pollInterval);
+              setIsLoading(false);
+              alert("video generation failed");
+            }
+          } catch (error) {
+            console.error("Still processing...");
+          }
+        }, 5000);
+      } else {
+        setIsLoading(false);
+        alert("Failed to create video!");
+      }
+    } catch (error) {
+      setIsLoading(false);
+      console.log("Failed to creating Video");
+      alert("Failed to Createing Video");
+    }
+  };
 
   const handleChange = (e) => {
     setPrompt(e.target.value);
@@ -47,7 +98,9 @@ const CreateProject = ({ user, credits }: props) => {
       return setTimeout(() => setShowCreditDialog(true), 700);
     }
 
-    createVideo(prompt);
+    setTimeout(() => {
+      handleCreateVideo();
+    }, 1000);
   };
   return (
     <div className="w-screen h-screen flex flex-col">
@@ -75,6 +128,14 @@ const CreateProject = ({ user, credits }: props) => {
           </Link>
         </div>
       )}
+
+      <Loader
+        key={isLoading ? "laoding" : "idle"}
+        loadingStates={LoadingState}
+        loading={isLoading}
+        duration={10000}
+        loop={false}
+      />
 
       <h1 className="text-4xl md:text-4xl lg:text-6xl font-semibold max-w-7xl mx-auto text-center mt-6 relative z-20 py-6 bg-clip-text text-transparent bg-gradient-to-b from-neutral-800 via-neutral-700 to-neutral-700 dark:from-neutral-800 dark:via-white dark:to-white">
         Generate Amazing Shorts <br />

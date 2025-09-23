@@ -26,6 +26,5 @@ export const createVideo = async (prompt: string) => {
 
   await videoQueue.add("generate-video", { videoId });
   console.log("Job added to queue successfully");
-
-  redirect(`/video/${videoId}`);
+  return { videoId };
 };
