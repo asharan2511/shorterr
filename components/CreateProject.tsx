@@ -63,7 +63,7 @@ const CreateProject = ({ user, credits }: props) => {
           try {
             const response = await fetch(`/api/video-status/${result.videoId}`);
             const data = await response.json();
-            if (data.Completed) {
+            if (data.completed) {
               clearInterval(pollInterval);
               router.replace(`/video/${result.videoId}`);
             } else if (data.failed) {
