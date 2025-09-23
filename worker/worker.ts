@@ -1,4 +1,4 @@
-import Redis from "ioredis";
+import { Redis } from "ioredis";
 import { Worker } from "bullmq";
 import { processes } from "@/app/actions/processes";
 import prisma from "@/app/lib/db";
